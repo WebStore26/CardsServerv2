@@ -38,23 +38,28 @@ using (var scope = app.Services.CreateScope())
 // ============ ENTERENCE ENDPOINTS ============
 
 // POST /enter — increase counter
-app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx) =>
+app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx, ILogger<Program> logger) =>
 {
+    logger.LogInformation("POST /enter called");
 
     string userIp = ctx.Request.Headers["X-Forwarded-For"].FirstOrDefault()
     ?? ctx.Connection.RemoteIpAddress?.ToString()
     ?? "unknown";
 
+    logger.LogInformation("userIp");
     string userAgent = ctx.Request.Headers["User-Agent"].ToString();
 
+    logger.LogInformation("entryText");
     string entryText =
     $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] " +
     $"IP: {userIp}, Agent: {userAgent}, Info: {dto?.Info}\n";
 
+    logger.LogInformation("record FirstOrDefaultAsync");
     var record = await db.Enterence.FirstOrDefaultAsync();
 
     if (record == null)
     {
+        logger.LogInformation("record is null");
         record = new Enterence
         {
             Counter = 1,
@@ -63,12 +68,8 @@ app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx) =>
         };
         db.Enterence.Add(record);
     }
-    else
-    {
-        record.Counter++;
-        record.LastEnetered = DateTime.UtcNow;
-    }
 
+    logger.LogInformation("newRecord started");
     var newRecord = new Enterence
     {
         Counter = -1,
@@ -76,10 +77,13 @@ app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx) =>
         Text = entryText
     };
 
+    logger.LogInformation("newRecord add");
     db.Enterence.Add(newRecord);
 
+    logger.LogInformation("save");
     await db.SaveChangesAsync();
 
+    logger.LogInformation("done");
     return Results.Ok(new
     {
         counter = record.Counter,
