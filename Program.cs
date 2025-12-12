@@ -38,15 +38,20 @@ using (var scope = app.Services.CreateScope())
 // ============ ENTERENCE ENDPOINTS ============
 
 // POST /enter — increase counter
-app.MapPost("/enter", async (AppDb db, HttpContext ctx) =>
+app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx) =>
 {
-    string userIp = ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+    string userIp = ctx.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+    ?? ctx.Connection.RemoteIpAddress?.ToString()
+    ?? "unknown";
+
     string userAgent = ctx.Request.Headers["User-Agent"].ToString();
 
-    var record = await db.Enterence.FirstOrDefaultAsync();
-
     string entryText =
-        $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] IP: {userIp}, Agent: {userAgent}\n";
+    $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] " +
+    $"IP: {userIp}, Agent: {userAgent}, Info: {dto?.Info}\n";
+
+    var record = await db.Enterence.FirstOrDefaultAsync();
 
     if (record == null)
     {
@@ -62,7 +67,6 @@ app.MapPost("/enter", async (AppDb db, HttpContext ctx) =>
     {
         record.Counter++;
         record.LastEnetered = DateTime.UtcNow;
-        record.Text = string.Empty;
     }
 
     var newRecord = new Enterence
@@ -71,7 +75,8 @@ app.MapPost("/enter", async (AppDb db, HttpContext ctx) =>
         LastEnetered = DateTime.UtcNow,
         Text = entryText
     };
-    db.Enterence.Add(record);
+
+    db.Enterence.Add(newRecord);
 
     await db.SaveChangesAsync();
 

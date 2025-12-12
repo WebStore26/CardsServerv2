@@ -17,6 +17,11 @@
         public DateTime LastEnetered { get; set; }
     }
 
+    public class EnterDto
+    {
+        public string? Info { get; set; }
+    }
+
     public class ReviewDto
     {
         public string Phone { get; set; } = "";
