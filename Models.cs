@@ -1,7 +1,12 @@
-﻿namespace CardsServer
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CardsServer
 {
     public class Review
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public int Id { get; set; }
         public string Phone { get; set; } = "";
         public string Text { get; set; } = "";
@@ -10,6 +15,8 @@
 
     public class Enterence
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Key]
         public int Id { get; set; }  
 
         public int Counter { get; set; }

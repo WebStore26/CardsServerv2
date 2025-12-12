@@ -1,5 +1,6 @@
 ﻿using CardsServer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -15,9 +16,9 @@ builder.Services.AddCors(options =>
 var dbUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 if (string.IsNullOrWhiteSpace(dbUrl))
     throw new Exception("DATABASE_URL env variable missing");
-
-// Convert URL to Npgsql format
 string connectionString = ConvertDatabaseUrl(dbUrl);
+
+//var connectionString = @"Host=nozomi.proxy.rlwy.net;Port=42425;Database=railway;Username=postgres;Password=AoIBESWkuevWLENtMiZxQsMNMgknsIYq;";
 
 builder.Services.AddDbContext<AppDb>(options =>
     options.UseNpgsql(connectionString));
@@ -26,6 +27,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Sveta API v1");
+    c.RoutePrefix = "swagger"; // /swagger
+});
 app.UseCors("AllowAll");
 
 // Auto-create tables
@@ -33,6 +40,8 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDb>();
     db.Database.EnsureCreated();
+
+    await db.SaveChangesAsync();
 }
 
 // ============ ENTERENCE ENDPOINTS ============
@@ -53,21 +62,6 @@ app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx, ILogger<Pr
     string entryText =
     $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] " +
     $"IP: {userIp}, Agent: {userAgent}, Info: {dto?.Info}\n";
-
-    //logger.LogInformation("record FirstOrDefaultAsync");
-    //var record = await db.Enterence.FirstOrDefaultAsync();
-
-    //if (record == null)
-    //{
-    //    logger.LogInformation("record is null");
-    //    record = new Enterence
-    //    {
-    //        Counter = 1,
-    //        LastEnetered = DateTime.UtcNow,
-    //        Text = entryText
-    //    };
-    //    db.Enterence.Add(record);
-    //}
 
     logger.LogInformation("newRecord started");
     var newRecord = new Enterence
