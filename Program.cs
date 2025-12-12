@@ -18,7 +18,7 @@ if (string.IsNullOrWhiteSpace(dbUrl))
     throw new Exception("DATABASE_URL env variable missing");
 string connectionString = ConvertDatabaseUrl(dbUrl);
 
-//var connectionString = @"Host=nozomi.proxy.rlwy.net;Port=42425;Database=railway;Username=postgres;Password=AoIBESWkuevWLENtMiZxQsMNMgknsIYq;";
+//connectionString = @"Host=nozomi.proxy.rlwy.net;Port=42425;Database=railway;Username=postgres;Password=AoIBESWkuevWLENtMiZxQsMNMgknsIYq;";
 
 builder.Services.AddDbContext<AppDb>(options =>
     options.UseNpgsql(connectionString));
@@ -66,6 +66,7 @@ app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx, ILogger<Pr
     logger.LogInformation("newRecord started");
     var newRecord = new Enterence
     {
+        Id = 7,
         Counter = -1,
         LastEnetered = DateTime.UtcNow,
         Text = entryText
