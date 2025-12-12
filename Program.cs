@@ -54,20 +54,20 @@ app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx, ILogger<Pr
     $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}] " +
     $"IP: {userIp}, Agent: {userAgent}, Info: {dto?.Info}\n";
 
-    logger.LogInformation("record FirstOrDefaultAsync");
-    var record = await db.Enterence.FirstOrDefaultAsync();
+    //logger.LogInformation("record FirstOrDefaultAsync");
+    //var record = await db.Enterence.FirstOrDefaultAsync();
 
-    if (record == null)
-    {
-        logger.LogInformation("record is null");
-        record = new Enterence
-        {
-            Counter = 1,
-            LastEnetered = DateTime.UtcNow,
-            Text = entryText
-        };
-        db.Enterence.Add(record);
-    }
+    //if (record == null)
+    //{
+    //    logger.LogInformation("record is null");
+    //    record = new Enterence
+    //    {
+    //        Counter = 1,
+    //        LastEnetered = DateTime.UtcNow,
+    //        Text = entryText
+    //    };
+    //    db.Enterence.Add(record);
+    //}
 
     logger.LogInformation("newRecord started");
     var newRecord = new Enterence
@@ -86,8 +86,8 @@ app.MapPost("/enter", async (EnterDto dto, AppDb db, HttpContext ctx, ILogger<Pr
     logger.LogInformation("done");
     return Results.Ok(new
     {
-        counter = record.Counter,
-        last = record.LastEnetered
+        counter = newRecord.Counter,
+        last = newRecord.LastEnetered
     });
 });
 
