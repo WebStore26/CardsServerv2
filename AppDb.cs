@@ -8,4 +8,6 @@ public class AppDb : DbContext
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<Enterence> Enterence => Set<Enterence>();
 
+    public DbSet<Click> Clicks => Set<Click>();
+
 }

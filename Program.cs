@@ -126,6 +126,39 @@ app.MapGet("/reviews", async (AppDb db) =>
     return Results.Ok(reviews);
 });
 
+// ============ CLICKS ENDPOINTS ============
+
+// POST /click — add click
+app.MapPost("/click", async (ClickDto dto, AppDb db, HttpContext ctx, ILogger<Program> logger) =>
+{
+    logger.LogInformation("POST /click called");
+
+    string userIp = ctx.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+        ?? ctx.Connection.RemoteIpAddress?.ToString()
+        ?? "unknown";
+
+    var click = new Click
+    {
+        ClickName = dto.ClickName,
+        ClickTime = DateTime.UtcNow,
+        Messsage = $"IP: {userIp}, {dto.Message}"
+    };
+
+    db.Clicks.Add(click);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
+});
+
+app.MapGet("/click", async (AppDb db) =>
+{
+    var clicks = await db.Clicks
+        .OrderByDescending(c => c.ClickTime)
+        .ToListAsync();
+
+    return Results.Ok(clicks);
+});
+
 app.Run();
 
 
@@ -176,3 +209,4 @@ static string ConvertDatabaseUrl(string rawUrl)
 }
 
 
+public record ClickDto(string ClickName, string? Message);
